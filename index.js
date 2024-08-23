@@ -1,24 +1,30 @@
-/* const {sum} = require('./lib')
-const {diff} = require('./lib')
-const lib = require('./lib')
-
-// console.log(lib) // It represents export object
-// console.log(sum(5,1)) */
-
-
-/* import {sum} from "./lib"
-import { diff } from "./lib"
-console.log(sum(5,1))
-console.log(diff(7,2)) */
-
-
+const http = require('http')
 const fs = require('fs')
 
-console.log(performance.now())
-/* const txt = fs.readFileSync('./content.txt','utf-8')
-console.log(txt) */
 
-fs.readFile('./content.txt','utf-8',(err,data)=>{
-    console.log(data)
+const index = fs.readFileSync('./index.html','utf-8')
+const data = JSON.parse(fs.readFileSync('./data.json','utf8'))
+const product = data.products[0]
+
+const server = http.createServer((req,res)=>{
+    switch(req.url) {
+        case '/':
+            res.setHeader("Content-Type",'text/html');
+            res.end(index)
+            break;
+
+        case '/api':
+            res.writeHead(200,{'Content-Type':'application/json'})
+            res.end(JSON.stringify(data))
+            break;
+
+        default:
+            res.writeHead(404);
+            res.end()
+    }
 })
-console.log(performance.now())
+
+
+server.listen(8080,()=>{
+    console.log("Listening on port 8080")
+})
