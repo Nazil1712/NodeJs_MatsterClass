@@ -1,41 +1,78 @@
-const http = require('http')
 const fs = require('fs')
+const express = require("express")
+const app = express()
+const morgan = require('morgan')
 
-
-const index = fs.readFileSync('./index.html','utf-8')
+const index = fs.readFileSync('./index.html')
 const data = JSON.parse(fs.readFileSync('./data.json','utf8'))
-const products = data.products
+const Allproducts = data.products
 
-const server = http.createServer((req,res)=>{
-    if(req.url.startsWith('/product')) { 
-        const id = req.url.split('/')[2];
-        const product = products.find((v,i,arr)=>v.id==(+id))
-        res.writeHead(200,{'Content-Type':'text/html'})
-            let newIndex = index.replace('**title**',product.title)
-            .replace('**price**',product.price)
-            .replace('**rating**',product.rating)
-            res.end(newIndex)
-            return;
+
+// Middleware
+app.use((req,res,next)=>{
+    console.log(req.method, req.ip, req.hostname, req.get('User-Agent'))
+    next()
+})
+
+app.use(express.json()) // ==> Used to parse JSON data from body
+// app.use(express.urlencoded()) ==> Used when we are dealing with form
+app.use(morgan('dev'))
+
+const Queryauth = (req,res,next) =>{
+    console.log(req.query)
+
+    if(req.query.password=='123') {
+        next()
     }
-
-    switch(req.url) {
-        case '/':
-            res.setHeader("Content-Type",'text/html');
-            res.end(index)
-            break;
-
-        case '/api':
-            res.writeHead(200,{'Content-Type':'application/json'})
-            res.end(JSON.stringify(product))
-            break;
-
-        default:
-            res.writeHead(404);
-            res.end()
+    else{
+        res.sendStatus(401)
     }
+}
+
+const Bodyauth = (req,res,next) =>{
+    console.log(req.body)
+    if(req.body.password=='123') {
+        next()
+    }
+    else{
+        res.sendStatus(401)
+    }
+}
+
+app.get('/auth',Queryauth,(req,res)=>{
+    res.send(`<h1>Logged In!</h1>`)
+})
+
+app.post('/auth',Bodyauth,(req,res)=>{
+    res.send(`<h1>Auhtorized Successfull</h1>`)
 })
 
 
-server.listen(8080,()=>{
+
+// API /OR/ EndPoints /OR/ Routes
+app.get('/',(req,res)=>{
+    res.json({type:"GET"})
+})
+app.post('/',(req,res)=>{
+    res.json({type:"post"})
+})
+app.patch('/',(req,res)=>{
+    res.json({type:"patch"})
+})
+app.delete('/',(req,res)=>{
+    res.json({type:"delete"})
+})
+app.put('/',(req,res)=>{
+    res.json({type:"put"})
+})
+
+
+app.get('/express',(req,res)=>{
+    // res.json(Allproducts)
+    // res.send(`<h1>Hello Nazil</h1>`)
+    // res.sendFile('D:/Nazil/1 A CHARUSAT/1 Visual Studio Code/Personal/Practice/20_NodeJs_MasterClass/NodeJs_MatsterClass/index.html')
+})
+
+app.listen(8080,()=>{
     console.log("Listening on port 8080")
 })
