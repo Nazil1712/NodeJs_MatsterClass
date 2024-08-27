@@ -3,75 +3,70 @@ const express = require("express")
 const app = express()
 const morgan = require('morgan')
 
+
 const index = fs.readFileSync('./index.html')
 const data = JSON.parse(fs.readFileSync('./data.json','utf8'))
 const Allproducts = data.products
 
 
-// Middleware
-app.use((req,res,next)=>{
-    console.log(req.method, req.ip, req.hostname, req.get('User-Agent'))
-    next()
-})
-
+/* Middleware */
 app.use(express.json()) // ==> Used to parse JSON data from body
 // app.use(express.urlencoded()) ==> Used when we are dealing with form
-app.use(morgan('dev'))
 
-const Queryauth = (req,res,next) =>{
-    console.log(req.query)
 
-    if(req.query.password=='123') {
-        next()
-    }
-    else{
-        res.sendStatus(401)
-    }
-}
 
-const Bodyauth = (req,res,next) =>{
+/* REST APIs */
+
+// READ API => GET
+app.get('/products',(req,res)=>{
+    res.json(Allproducts)
+})
+
+app.get('/products/:id',(req,res)=>{
+    // console.log(req.params)
+    const id = req.params.id;
+    const product = Allproducts.find((v,i,arr)=>v.id == +id)
+    res.json(product)
+})
+
+
+// Create API => POST
+app.post('/products',(req,res)=>{
     console.log(req.body)
-    if(req.body.password=='123') {
-        next()
-    }
-    else{
-        res.sendStatus(401)
-    }
-}
-
-app.get('/auth',Queryauth,(req,res)=>{
-    res.send(`<h1>Logged In!</h1>`)
-})
-
-app.post('/auth',Bodyauth,(req,res)=>{
-    res.send(`<h1>Auhtorized Successfull</h1>`)
+    Allproducts.push(req.body)
+    res.json(req.body)
 })
 
 
-
-// API /OR/ EndPoints /OR/ Routes
-app.get('/',(req,res)=>{
-    res.json({type:"GET"})
-})
-app.post('/',(req,res)=>{
-    res.json({type:"post"})
-})
-app.patch('/',(req,res)=>{
-    res.json({type:"patch"})
-})
-app.delete('/',(req,res)=>{
-    res.json({type:"delete"})
-})
-app.put('/',(req,res)=>{
-    res.json({type:"put"})
+/* Update API => PUT */
+app.put('/products/:id',(req,res)=>{
+    const id = +req.params.id;
+    const productIndex = Allproducts.findIndex((v,i,arr)=>v.id===id)
+    Allproducts.splice(productIndex,1,{id:id,...req.body})
+    res.json(Allproducts)
 })
 
 
-app.get('/express',(req,res)=>{
-    // res.json(Allproducts)
-    // res.send(`<h1>Hello Nazil</h1>`)
-    // res.sendFile('D:/Nazil/1 A CHARUSAT/1 Visual Studio Code/Personal/Practice/20_NodeJs_MasterClass/NodeJs_MatsterClass/index.html')
+/* Update API => PATCH */
+app.patch('/products/:id',(req,res)=>{
+    const id = +req.params.id
+    const productIndex = Allproducts.findIndex((p)=>p.id===id)
+    const product = Allproducts[productIndex]
+    Allproducts.splice(productIndex,1,{...product,...req.body})
+    res.json({status:"successfull"})
 })
+
+
+/* Delete API => DELETE */
+app.delete('/products/:id',(req,res)=>{
+    const id = +req.params.id
+    const productIndex = Allproducts.findIndex((p)=>p.id===id)
+    Allproducts.splice(productIndex,1)
+    res.json({status:"successfull"})
+})
+
+
+
 
 app.listen(8080,()=>{
     console.log("Listening on port 8080")
