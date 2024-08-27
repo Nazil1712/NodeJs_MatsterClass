@@ -12,7 +12,7 @@ const getAllProducts = (req,res)=>{
     res.json(Allproducts)
 }
 
-const getPrdouct = (req,res)=>{
+const getProduct = (req,res)=>{
     // console.log(req.params)
     const id = req.params.id;
     const product = Allproducts.find((v,i,arr)=>v.id == +id)
@@ -42,4 +42,4 @@ const deleteProduct = (req,res)=>{
 } 
 
 
-module.exports = {createProduct,updateProduct,replaceProduct,deleteProduct,getPrdouct,getAllProducts}
+module.exports = {createProduct,updateProduct,replaceProduct,deleteProduct,getProduct,getAllProducts}
