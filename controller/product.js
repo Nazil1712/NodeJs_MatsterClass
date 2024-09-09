@@ -3,7 +3,7 @@ const data = JSON.parse(fs.readFileSync("./data.json", "utf8"));
 const Allproducts = data.products;
 const { Product } = require("../model/product");
 
-console.log("Model", Product);
+// console.log("Model", Product);
 
 const createProduct = async (req, res) => {
   // We can create new product in two ways
